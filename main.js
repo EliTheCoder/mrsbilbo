@@ -12,35 +12,40 @@ const bot = createBot({
 
 const data = JSON.parse(await Deno.readTextFile("./data.json"))
 const webhooks = JSON.parse(await Deno.readTextFile("./webhooks.json"))
-// const talker_role_id = "1077066335466557440";
+
+// people who are allowed to talk for deep guy
 const talkers = ["280467655541129216", "470935011722395651"];
 
 bot.events.messageCreate = async (b, message) => {
-    console.log("new message")
-    if (data[message.channelId] === undefined) return;
-    console.log("transferrable")
+    const twin = data[message.channelId];
+    if (twin === undefined) return;
     if (message.guildId == "1077013349625249855") {
         if (!talkers.includes(message.authorId.toString())) return;
-        sendMessage(b, data[message.channelId], {content: message.content});
+        sendMessage(b, twin, {content: message.content});
         deleteMessage(b, message.channelId, message.id);
         return;
     }
     const member = await getMember(b, message.guildId, message.authorId);
-    const avatar_hash = (member.user.avatar & ~(BigInt(15) << BigInt(32*4))).toString(16).padStart(32, "0");
-    const avatar_url = `https://cdn.discordapp.com/avatars/${member.user.id}/${avatar_hash}`
-    const body = {
-        username: member.nick || member.user.username,
-        content: message.content,
-        avatar_url: avatar_url,
-    }
-    if (webhooks[data[message.channelId]] === undefined) return console.log("no webhook :(");
-    fetch(webhooks[data[message.channelId]], {
+    const webhook = webhooks[twin];
+    if (webhook === undefined) return;
+    fetch(webhook, {
         method: "post",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+            username: member.nick || member.user.username,
+            content: message.content,
+            avatar_url: getAvatarURL(member.user.avatar, member.user.id),
+        }
+        ),
     })
 };
+
+function getAvatarURL(avatar, id) {
+    const avatar_hash = (avatar & ~(BigInt(15) << BigInt(32*4))).toString(16).padStart(32, "0");
+    const avatar_url = `https://cdn.discordapp.com/avatars/${id}/${avatar_hash}`
+    return avatar_url;
+}
 
 await startBot(bot);
