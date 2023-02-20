@@ -21,8 +21,8 @@ bot.events.messageCreate = async (b, message) => {
     if (twin === undefined) return;
     if (message.guildId == "1077013349625249855") {
         if (!talkers.includes(message.authorId.toString())) return;
-        sendMessage(b, twin, {content: message.content});
-        deleteMessage(b, message.channelId, message.id);
+        await deleteMessage(b, message.channelId, message.id);
+        await sendMessage(b, twin, {content: message.content});
         return;
     }
     const member = await getMember(b, message.guildId, message.authorId);
@@ -37,8 +37,10 @@ bot.events.messageCreate = async (b, message) => {
             username: member.nick || member.user.username,
             content: message.content,
             avatar_url: getAvatarURL(member.user.avatar, member.user.id),
-        }
-        ),
+            embeds: message.attachments.map(attachment => {
+                return {image: {url: attachment.url}};
+            })
+        }),
     })
 };
 
