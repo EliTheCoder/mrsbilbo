@@ -13,8 +13,8 @@ const bot = createBot({
 const data = (await Deno.readTextFile("./data.ssv")).split("\n").map(line => line.split(" "));
 
 function getActualChannel(id: string) {
-    const index = data.findIndex(element => element[1] === id);
-    return index === -1 ? undefined : data[index][0];
+    const index = data.findIndex(element => element[0] === id);
+    return index === -1 ? undefined : data[index][1];
 }
 function getWebhook(id: string) {
     const index = data.findIndex(element => element[1] === id);
