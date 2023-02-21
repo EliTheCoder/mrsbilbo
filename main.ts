@@ -35,7 +35,7 @@ bot.events.messageCreate = async (b, message) => {
         },
         body: JSON.stringify({
             username: member.nick || member.user?.username,
-            content: message.content,
+            content: message.content.replaceAll("<@503611493804277780>", "<@280467655541129216>"),
             avatar_url: getAvatarURL(member.user?.avatar, member.user?.id),
             embeds: message.attachments.map(attachment => {
                 return {image: {url: attachment.url}};
