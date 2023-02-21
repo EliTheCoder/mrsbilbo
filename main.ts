@@ -55,8 +55,7 @@ bot.events.messageCreate = async (b, message) => {
 function getAvatarURL(avatar: bigint | undefined, id: bigint | undefined) {
     if (avatar === undefined || id === undefined) return undefined;
     const avatar_hash = (avatar & ~(BigInt(15) << BigInt(32*4))).toString(16).padStart(32, "0");
-    const avatar_url = `https://cdn.discordapp.com/avatars/${id}/${avatar_hash}`
-    return avatar_url;
+    return `https://cdn.discordapp.com/avatars/${id}/${avatar_hash}`
 }
 
 await startBot(bot);
