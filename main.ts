@@ -10,23 +10,31 @@ const bot = createBot({
     },
 });
 
-const data = JSON.parse(await Deno.readTextFile("./data.json"))
-const webhooks = JSON.parse(await Deno.readTextFile("./webhooks.json"))
+const data = (await Deno.readTextFile("./data.ssv")).split("\n").map(line => line.split(" "));
+
+function getActualChannel(id: string) {
+    const index = data.findIndex(element => element[1] === id);
+    return index === -1 ? undefined : data[index][0];
+}
+function getWebhook(id: string) {
+    const index = data.findIndex(element => element[1] === id);
+    return index === -1 ? undefined : data[index][2];
+}
 
 const talkers = ["280467655541129216", "470935011722395651"];
 
 bot.events.messageCreate = async (b, message) => {
-    const twin = data[message.channelId.toString()];
-    if (twin === undefined) return;
+    if (message.guildId === undefined) return;
     if (message.guildId?.toString() == "1077013349625249855") {
+        const actualChannel = getActualChannel(message.channelId.toString());
+        if (actualChannel === undefined) return;
         if (!talkers.includes(message.authorId.toString())) return;
         await deleteMessage(b, message.channelId, message.id);
-        await sendMessage(b, twin, {content: message.content});
+        await sendMessage(b, actualChannel, {content: message.content});
         return;
     }
-    if (message.guildId === undefined) return;
     const member = await getMember(b, message.guildId.toString(), message.authorId);
-    const webhook = webhooks[twin];
+    const webhook = getWebhook(message.channelId.toString());
     if (webhook === undefined) return;
     fetch(webhook, {
         method: "post",
@@ -34,7 +42,7 @@ bot.events.messageCreate = async (b, message) => {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            username: member.nick || member.user?.username,
+            username: member.nick ?? member.user?.username,
             content: message.content,
             avatar_url: getAvatarURL(member.user?.avatar, member.user?.id),
             embeds: message.attachments.map(attachment => {
