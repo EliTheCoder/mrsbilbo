@@ -49,7 +49,7 @@ async function sendProxyMessage(b: Bot, message: Message) {
         },
         body: JSON.stringify({
             username: member.nick ?? member.user?.username,
-            content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@${config.talkerRole}>`),
+            content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@&${config.talkerRole}>`),
             avatar_url: getAvatarURL(member.user?.avatar, member.user?.id),
             embeds: message.attachments.map(attachment => {
                 return {image: {url: attachment.url}};
