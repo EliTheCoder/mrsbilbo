@@ -1,7 +1,7 @@
 import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 
 const bot = createBot({
-    token: "NTAzNjExNDkzODA0Mjc3Nzgw.GfAIvC.5OJwwWISATKDTzOzGzNKtT91bMghbyycAoL5eY",
+    token: Deno.env.get("MRSBILBO_TOKEN"),
     intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
     events: {
         ready() {
