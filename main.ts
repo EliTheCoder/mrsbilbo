@@ -1,4 +1,4 @@
-import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getActualChannel, getWebhook } from "./readdata.ts";
@@ -22,9 +22,7 @@ if (!["talkerRole", "deepGuyId", "mrsBilboId", "homeChannel"].every(key => Objec
 
 bot.events.messageCreate = async (b, message) => {
     if (message.guildId === undefined) {
-        sendMessage(b, <string>config.homeChannel, {
-            content: `**DM from ${message.tag}:** ${message.content}`
-        })
+        await sendProxyDM(b, message);
     } else {
         if (message.guildId === BigInt(<string>config.mrsBilboId)) {
             await sendMessageToActualServer(b, message);
@@ -60,6 +58,22 @@ async function sendProxyMessage(b: Bot, message: Message) {
                 return {image: {url: attachment.url}};
             })
         }),
+    })
+}
+
+async function sendProxyDM(b: Bot, message: Message) {
+    const user = await getUser(b, message.authorId);
+    await sendMessage(b, <string>config.homeChannel, {
+        embeds: [
+            {
+                "type": "rich",
+                "description": message.content,
+                "color": 0x00FFFF,
+                "author": {
+                    "name": user.username
+                }
+            }
+        ]
     })
 }
 
