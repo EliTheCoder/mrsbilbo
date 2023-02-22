@@ -1,9 +1,10 @@
 import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { getActualChannel, getWebhook } from "./readdata.ts";
 
-if (Deno.env.get("MRSBILBO_TOKEN") == undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
+if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
 
 const bot = createBot({
-    token: Deno.env.get("MRSBILBO_TOKEN"),
+    token: Deno.env.get("MRSBILBO_TOKEN")!,
     intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
     events: {
         ready() {
@@ -11,21 +12,6 @@ const bot = createBot({
         },
     },
 });
-
-const data = (await Deno.readTextFile("./data.ssv"))
-    .split("\n")
-    .filter(line => !line.startsWith("//"))
-    .map(line => line.split(" "))
-    .filter(line => line.length === 3);
-
-function getActualChannel(id: string) {
-    const index = data.findIndex(element => element[0] === id);
-    return index === -1 ? undefined : data[index][1];
-}
-function getWebhook(id: string) {
-    const index = data.findIndex(element => element[1] === id);
-    return index === -1 ? undefined : data[index][2];
-}
 
 const talkerRole = BigInt("1077066335466557440");
 const deepGuyId = BigInt("503611493804277780");
