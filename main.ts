@@ -1,6 +1,8 @@
 import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
-import { getActualChannel, getWebhook } from "./readdata.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
+
+import { getActualChannel, getWebhook } from "./readdata.ts";
+import { getAvatarURL } from "./avatarurl.ts"
 
 if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
 
@@ -47,11 +49,5 @@ bot.events.messageCreate = async (b, message) => {
         }),
     })
 };
-
-function getAvatarURL(avatar: bigint | undefined, id: bigint | undefined) {
-    if (avatar === undefined || id === undefined) return undefined;
-    const avatar_hash = (avatar & ~(BigInt(15) << BigInt(32*4))).toString(16).padStart(32, "0");
-    return `https://cdn.discordapp.com/avatars/${id}/${avatar_hash}`
-}
 
 await startBot(bot);
