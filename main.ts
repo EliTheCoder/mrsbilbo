@@ -65,11 +65,12 @@ async function sendProxyDM(b: Bot, message: Message) {
     await sendMessage(b, <string>config.homeChannel, {
         embeds: [
             {
-                "type": "rich",
-                "description": message.content,
-                "color": 0x00FFFF,
-                "author": {
-                    "name": user.username
+                type: "rich",
+                description: message.content,
+                color: 0x00FFFF,
+                author: {
+                    name: user.username,
+                    iconUrl: getAvatarURL(b, user.id, user.discriminator, {avatar: user.avatar})
                 }
             }
         ]
