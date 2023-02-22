@@ -25,14 +25,17 @@ function getWebhook(id: string) {
     return index === -1 ? undefined : data[index][2];
 }
 
-const talkers = ["280467655541129216", "470935011722395651"];
+const talkerRole = BigInt("1077066335466557440");
+const deepGuyId = BigInt("503611493804277780");
+const mrsBilboId = BigInt("1077013349625249855");
 
 bot.events.messageCreate = async (b, message) => {
     if (message.guildId === undefined) return;
-    if (message.guildId?.toString() == "1077013349625249855") {
+    if (message.guildId === mrsBilboId) {
         const actualChannel = getActualChannel(message.channelId.toString());
         if (actualChannel === undefined) return;
-        if (!talkers.includes(message.authorId.toString())) return;
+        if (message.isFromBot) return;
+        if (!(await getMember(b, message.guildId, message.authorId)).roles.includes(talkerRole)) return;
         await deleteMessage(b, message.channelId, message.id);
         await sendMessage(b, actualChannel, {content: message.content});
         return;
@@ -47,7 +50,7 @@ bot.events.messageCreate = async (b, message) => {
         },
         body: JSON.stringify({
             username: member.nick ?? member.user?.username,
-            content: message.content.replaceAll("<@503611493804277780>", "<@280467655541129216>"),
+            content: message.content.replaceAll(`<@${deepGuyId}>`, `<@${talkerRole}>`),
             avatar_url: getAvatarURL(member.user?.avatar, member.user?.id),
             embeds: message.attachments.map(attachment => {
                 return {image: {url: attachment.url}};
