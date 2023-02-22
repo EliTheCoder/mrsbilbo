@@ -8,7 +8,7 @@ if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBI
 
 const bot = createBot({
     token: Deno.env.get("MRSBILBO_TOKEN")!,
-    intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
+    intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers | Intents.DirectMessages,
     events: {
         ready() {
             console.log("Successfully connected to gateway");
