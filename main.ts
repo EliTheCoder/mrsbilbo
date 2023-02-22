@@ -18,14 +18,19 @@ const bot = createBot({
 
 
 const config = parse(await Deno.readTextFile("config.toml"));
-if (!["talkerRole", "deepGuyId", "mrsBilboId"].every(key => Object.keys(config).includes(key))) throw new Error("Missing config keys");
+if (!["talkerRole", "deepGuyId", "mrsBilboId", "homeChannel"].every(key => Object.keys(config).includes(key))) throw new Error("Missing config keys");
 
 bot.events.messageCreate = async (b, message) => {
-    if (message.guildId === undefined) return;
-    if (message.guildId === BigInt(<string>config.mrsBilboId)) {
-        await sendMessageToActualServer(b, message);
+    if (message.guildId === undefined) {
+        sendMessage(b, <string>config.homeChannel, {
+            content: `**DM from ${message.tag}:** ${message.content}`
+        })
     } else {
-        await sendProxyMessage(b, message);
+        if (message.guildId === BigInt(<string>config.mrsBilboId)) {
+            await sendMessageToActualServer(b, message);
+        } else {
+            await sendProxyMessage(b, message);
+        }
     }
 };
 
