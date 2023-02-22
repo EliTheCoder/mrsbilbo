@@ -1,4 +1,4 @@
-import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getActualChannel, getWebhook } from "./readdata.ts";
@@ -23,15 +23,23 @@ if (!["talkerRole", "deepGuyId", "mrsBilboId"].every(key => Object.keys(config).
 bot.events.messageCreate = async (b, message) => {
     if (message.guildId === undefined) return;
     if (message.guildId === BigInt(<string>config.mrsBilboId)) {
-        const actualChannel = getActualChannel(message.channelId.toString());
-        if (actualChannel === undefined) return;
-        if (message.isFromBot) return;
-        if (!(await getMember(b, message.guildId, message.authorId)).roles.includes(BigInt(<string>config.talkerRole))) return;
-        await deleteMessage(b, message.channelId, message.id);
-        await sendMessage(b, actualChannel, {content: message.content});
-        return;
+        await sendMessageToActualServer(b, message);
+    } else {
+        await sendProxyMessage(b, message);
     }
-    const member = await getMember(b, message.guildId.toString(), message.authorId);
+};
+
+async function sendMessageToActualServer(b: Bot, message: Message) {
+    const actualChannel = getActualChannel(message.channelId.toString());
+    if (actualChannel === undefined) return;
+    if (message.isFromBot) return;
+    if (!(await getMember(b, message.guildId!, message.authorId)).roles.includes(BigInt(<string>config.talkerRole))) return;
+    await deleteMessage(b, message.channelId, message.id);
+    await sendMessage(b, actualChannel, {content: message.content});
+}
+
+async function sendProxyMessage(b: Bot, message: Message) {
+    const member = await getMember(b, message.guildId!.toString(), message.authorId);
     const webhook = getWebhook(message.channelId.toString());
     if (webhook === undefined) return;
     fetch(webhook, {
@@ -48,6 +56,6 @@ bot.events.messageCreate = async (b, message) => {
             })
         }),
     })
-};
+}
 
 await startBot(bot);
