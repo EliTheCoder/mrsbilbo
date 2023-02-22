@@ -1,5 +1,7 @@
 import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 
+if (Deno.env.get("MRSBILBO_TOKEN") == undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
+
 const bot = createBot({
     token: Deno.env.get("MRSBILBO_TOKEN"),
     intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers,
