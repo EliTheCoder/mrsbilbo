@@ -1,8 +1,7 @@
-import { deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getActualChannel, getWebhook } from "./readdata.ts";
-import { getAvatarURL } from "./avatarurl.ts"
 
 if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
 
@@ -53,7 +52,7 @@ async function sendProxyMessage(b: Bot, message: Message) {
         body: JSON.stringify({
             username: member.nick ?? member.user?.username,
             content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@&${config.talkerRole}>`),
-            avatar_url: getAvatarURL(member.user?.avatar, member.user?.id),
+            avatar_url: getAvatarURL(b, member.id, member.user?.discriminator ?? "0000", {avatar: member.user?.avatar}),
             embeds: message.attachments.map(attachment => {
                 return {image: {url: attachment.url}};
             })
