@@ -39,9 +39,9 @@ async function sendMessageToActualServer(b: Bot, message: Message) {
 }
 
 async function sendProxyMessage(b: Bot, message: Message) {
-    const member = await getMember(b, message.guildId!.toString(), message.authorId);
     const webhook = getWebhook(message.channelId.toString());
     if (webhook === undefined) return;
+    const member = await getMember(b, message.guildId!.toString(), message.authorId);
     fetch(webhook, {
         method: "post",
         headers: {
