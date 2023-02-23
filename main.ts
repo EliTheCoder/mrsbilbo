@@ -1,7 +1,7 @@
-import { getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { getChannelWebhooks, executeWebhook, getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
-import { getActualChannel, getWebhook } from "./readdata.ts";
+import { getActualChannel } from "./readdata.ts";
 
 if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
 
@@ -41,22 +41,19 @@ async function sendMessageToActualServer(b: Bot, message: Message) {
 }
 
 async function sendProxyMessage(b: Bot, message: Message) {
-    const webhook = getWebhook(message.channelId.toString());
-    if (webhook === undefined) return;
+    const actualChannel = getActualChannel(message.channelId.toString());
+    if (actualChannel === undefined) return;
+    const webhooks = await getChannelWebhooks(b, actualChannel);
+    if (webhooks.size < 1) return;
     const member = await getMember(b, message.guildId!.toString(), message.authorId);
-    fetch(webhook, {
-        method: "post",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            username: member.nick ?? member.user?.username,
-            content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@&${config.talkerRole}>`),
-            avatar_url: getAvatarURL(b, member.id, member.user?.discriminator ?? "0000", {avatar: member.user?.avatar}),
-            embeds: message.attachments.map(attachment => {
-                return {image: {url: attachment.url}};
-            })
-        }),
+    const webhook = webhooks.first()!;
+    executeWebhook(b, webhook.id, webhook.token!, {
+        username: member.nick ?? member.user?.username,
+        content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@&${config.talkerRole}>`),
+        avatarUrl: getAvatarURL(b, member.id, "0000", {avatar: member.user?.avatar}),
+        embeds: message.attachments.map(attachment => {
+            return {image: {url: attachment.url}};
+        })
     })
 }
 
