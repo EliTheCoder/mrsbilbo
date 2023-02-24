@@ -1,7 +1,7 @@
 import { getChannelWebhooks, executeWebhook, getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
-import { getActualChannel } from "./readdata.ts";
+import { getProxyChannel, getActualChannel } from "./readdata.ts";
 
 if (Deno.env.get("MRSBILBO_TOKEN") === undefined) throw new Error("Missing MRSBILBO_TOKEN environment variable");
 
@@ -41,9 +41,9 @@ async function sendMessageToActualServer(b: Bot, message: Message) {
 }
 
 async function sendProxyMessage(b: Bot, message: Message) {
-    const actualChannel = getActualChannel(message.channelId.toString());
-    if (actualChannel === undefined) return;
-    const webhooks = await getChannelWebhooks(b, actualChannel);
+    const proxyChannel = getProxyChannel(message.channelId.toString());
+    if (proxyChannel === undefined) return;
+    const webhooks = await getChannelWebhooks(b, proxyChannel);
     if (webhooks.size < 1) return;
     const member = await getMember(b, message.guildId!.toString(), message.authorId);
     const webhook = webhooks.first()!;
