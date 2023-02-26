@@ -1,4 +1,4 @@
-import { getChannelWebhooks, executeWebhook, getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import { Embed, getMessage, getChannelWebhooks, executeWebhook, getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getProxyChannel, getActualChannel } from "./readdata.ts";
@@ -47,14 +47,27 @@ async function sendProxyMessage(b: Bot, message: Message) {
     if (webhooks.size < 1) return;
     const member = await getMember(b, message.guildId!.toString(), message.authorId);
     const webhook = webhooks.first()!;
-    executeWebhook(b, webhook.id, webhook.token!, {
+    const body = {
         username: member.nick ?? member.user?.username,
         content: message.content.replaceAll(`<@${config.deepGuyId}>`, `<@&${config.talkerRole}>`),
         avatarUrl: getAvatarURL(b, member.id, "0000", {avatar: member.user?.avatar}),
-        embeds: message.attachments.map(attachment => {
-            return {image: {url: attachment.url}};
-        })
-    })
+        embeds: <Embed[]>message.attachments.map(attachment => ({image: {url: attachment.url}}))
+    }
+    if (message.type === 19) {
+        const referencedMessage = await getMessage(b, message.messageReference!.channelId!, message.messageReference!.messageId!);
+        const referencedMember = await getMember(b, message.messageReference!.guildId!.toString(), referencedMessage.authorId);
+        body.embeds.push({
+            type: "rich",
+            title: `Reply to:`,
+            description: referencedMessage.content,
+            color: 0xFFFF00,
+            author: {
+                name: referencedMember.nick ?? referencedMember.user!.username,
+                iconUrl: getAvatarURL(b, referencedMember.id, referencedMember.user!.discriminator, {avatar: member.user?.avatar})
+            }
+        });
+    }
+    executeWebhook(b, webhook.id, webhook.token!, body)
 }
 
 async function sendProxyDM(b: Bot, message: Message) {
