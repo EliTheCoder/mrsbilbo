@@ -1,4 +1,20 @@
-import { Embed, getMessage, getChannelWebhooks, executeWebhook, getAvatarURL, deleteMessage, sendMessage, getMember, createBot, Intents, startBot, Message, Bot, getUser } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+import {
+    MessageTypes,
+    Embed,
+    getMessage,
+    getChannelWebhooks,
+    executeWebhook,
+    getAvatarURL,
+    deleteMessage,
+    sendMessage,
+    getMember,
+    createBot,
+    Intents,
+    startBot,
+    Message,
+    Bot,
+    getUser
+} from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getProxyChannel, getActualChannel } from "./readdata.ts";
@@ -53,9 +69,12 @@ async function sendProxyMessage(b: Bot, message: Message) {
         avatarUrl: getAvatarURL(b, member.id, "0000", {avatar: member.user?.avatar}),
         embeds: <Embed[]>message.attachments.map(attachment => ({image: {url: attachment.url}}))
     }
-    if (message.type === 19) {
+    if (message.type === MessageTypes.Reply) { // if message is a reply
         const referencedMessage = await getMessage(b, message.messageReference!.channelId!, message.messageReference!.messageId!);
         const referencedMember = await getMember(b, message.messageReference!.guildId!.toString(), referencedMessage.authorId);
+        if (message.mentionedUserIds.includes(BigInt(<string>config.deepGuyId))) {
+            body.content = `<@&${config.talkerRole}> ${body.content}`
+        }
         body.embeds.push({
             type: "rich",
             title: `Reply to:`,
