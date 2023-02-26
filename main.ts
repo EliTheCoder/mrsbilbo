@@ -69,7 +69,7 @@ async function sendProxyMessage(b: Bot, message: Message) {
         avatarUrl: getAvatarURL(b, member.id, "0000", {avatar: member.user?.avatar}),
         embeds: <Embed[]>message.attachments.map(attachment => ({image: {url: attachment.url}}))
     }
-    if (message.type === MessageTypes.Reply) { // if message is a reply
+    if (message.type === MessageTypes.Reply) {
         const referencedMessage = await getMessage(b, message.messageReference!.channelId!, message.messageReference!.messageId!);
         const referencedMember = await getMember(b, message.messageReference!.guildId!.toString(), referencedMessage.authorId);
         if (message.mentionedUserIds.includes(BigInt(<string>config.deepGuyId))) {
