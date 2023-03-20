@@ -15,6 +15,7 @@ import {
     Bot,
     getUser,
     editBotMember,
+    getDmChannel,
 } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
@@ -41,6 +42,9 @@ bot.events.messageCreate = async (b, message) => {
         await sendProxyDM(b, message);
     } else {
         if (message.guildId === BigInt(<string>config.mrsBilboId)) {
+            if (message.content.startsWith("!dm")) {
+                await sendDirectMessage(b, message);
+            }
             await sendMessageToActualServer(b, message);
         } else {
             await sendProxyMessage(b, message);
@@ -96,6 +100,15 @@ async function sendProxyMessage(b: Bot, message: Message) {
         });
     }
     executeWebhook(b, webhook.id, webhook.token!, body)
+}
+
+async function sendDirectMessage(b: Bot, message: Message) {
+    const args = message.content.split(" ");
+    if (!(await getMember(b, message.guildId!, message.authorId)).roles.includes(BigInt(<string>config.talkerRole))) return;
+    if (args.length < 3) return;
+    const dmChannel = await getDmChannel(b, BigInt(args[1]));
+    const content = args.slice(2).join(" ");
+    sendMessage(b, dmChannel.id, {content});
 }
 
 async function sendProxyDM(b: Bot, message: Message) {
