@@ -13,7 +13,8 @@ import {
     startBot,
     Message,
     Bot,
-    getUser
+    getUser,
+    editBotMember,
 } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
@@ -46,6 +47,14 @@ bot.events.messageCreate = async (b, message) => {
         }
     }
 };
+
+bot.events.guildMemberUpdate = async (b, member, user) => {
+    if (user.id === b.id) {
+        if (user.id === b.id && member.nick) {
+            await editBotMember(b, member.guildId, {nick: null});
+        }
+    }
+}
 
 async function sendMessageToActualServer(b: Bot, message: Message) {
     const actualChannel = getActualChannel(message.channelId.toString());
