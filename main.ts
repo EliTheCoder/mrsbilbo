@@ -16,6 +16,7 @@ import {
     getUser,
     editBotMember,
     getDmChannel,
+    editBotStatus,
 } from "https://deno.land/x/discordeno@18.0.0/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
@@ -27,8 +28,9 @@ const bot = createBot({
     token: Deno.env.get("MRSBILBO_TOKEN")!,
     intents: Intents.Guilds | Intents.GuildMessages | Intents.MessageContent | Intents.GuildMembers | Intents.DirectMessages | Intents.GuildWebhooks,
     events: {
-        ready() {
+        async ready(b: Bot) {
             console.log("Successfully connected to gateway");
+            await editBotStatus(b, {status: "offline", activities: []})
         },
     },
 });
