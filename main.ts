@@ -11,7 +11,6 @@ import {
     startBot,
     Message,
     Bot,
-    editBotStatus,
 } from "https://deno.land/x/discordeno@18.0.1/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
@@ -25,10 +24,17 @@ const bot = createBot({
     events: {
         async ready(b: Bot) {
             console.log("Successfully connected to gateway");
-            await editBotStatus(b, {status: "offline", activities: []})
         },
     },
 });
+
+bot.gateway.manager.createShardOptions.makePresence = (shardId: number) => {
+    return {
+        shardId,
+        status: "invisible",
+        activities: [],
+    }
+}
 
 
 const config = parse(await Deno.readTextFile("config.toml"));
