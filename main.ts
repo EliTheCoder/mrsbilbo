@@ -12,7 +12,7 @@ import {
     Message,
     Bot,
     editBotStatus,
-} from "https://deno.land/x/discordeno@18.0.0/mod.ts";
+} from "https://deno.land/x/discordeno@18.0.1/mod.ts";
 import { parse } from "https://deno.land/std@0.97.0/encoding/toml.ts";
 
 import { getProxyChannel } from "./readdata.ts";
